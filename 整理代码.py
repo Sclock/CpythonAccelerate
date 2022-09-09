@@ -2,7 +2,16 @@ import numpy as np
 import random
 
 
-def draw(img_back: np.ndarray, img_draw: np.ndarray, y: int, x: int) -> None:
+def print_array(np_arr: np.ndarray):
+    """打印矩阵"""
+    for y in range(np_arr.shape[0]):
+        for x in range(np_arr.shape[1]):
+            # print(x, y)
+            print(np_arr[y, x], "\t", end="")
+        print()
+
+
+def draw(img_back: np.ndarray, img_draw: np.ndarray, x: int, y: int) -> None:
     """
     L模式输入底图,写图,和坐标
     图像叠加,指定区域改写为新图片
@@ -16,20 +25,20 @@ def draw(img_back: np.ndarray, img_draw: np.ndarray, y: int, x: int) -> None:
 
     # 提取底图书写区域
     img_back_draw = img_back[y:y2, x:x2][:, :, 0]
-    # img_back_draw.shape [x,y]
 
+    # 写区域
     new_back = np.empty(
         (
-            draw_img.shape[0],
-            draw_img.shape[1],
+            img_back_draw.shape[0],
+            img_back_draw.shape[1],
         ), dtype=int
     ) * 255
     # new_back.shape [x,y]
 
     # 开始拼合
     # 底图和水印谁更小取谁
-    for _y in range(img_draw.shape[1]):
-        for _x in range(img_draw.shape[0]):
+    for _y in range(img_draw.shape[0]):
+        for _x in range(img_draw.shape[1]):
             if img_draw[_y, _x] < img_back_draw[_y, _x]:
                 new_back[_y, _x] = img_draw[_y, _x]
             else:
@@ -69,8 +78,11 @@ def all_draw(
     """
 
     # 网格间距
-    draw_img_x_max: int = draw_img.shape[0] + space_x
-    draw_img_y_max: int = draw_img.shape[1] + space_y
+    draw_img_x_max: int = draw_img.shape[1] + space_x
+    draw_img_y_max: int = draw_img.shape[0] + space_y
+
+    # 错位坐标计算
+    add_value: int = draw_img_y_max // 3
 
     # 设置为最大随机数 乘 可放下的数量向上取整
     draw_x_fre: int = div_ceil(back_shape_x, draw_img_x_max)
@@ -78,19 +90,16 @@ def all_draw(
 
     # 计算绘制层大小
     draw_back_shape_x: int = (draw_x_fre * draw_img_x_max) + rand_x
-    draw_back_shape_y: int = (draw_y_fre * draw_img_y_max) + rand_y
+    draw_back_shape_y: int = (draw_y_fre * draw_img_y_max) + rand_y + add_value
 
     # 创建白色底层
     draw_back = np.ones(
         (
-            draw_back_shape_x,
             draw_back_shape_y,
+            draw_back_shape_x,
             1
         ), dtype=int
     ) * 255
-
-    # 错位坐标计算
-    add_value: int = draw_img_x_max // 3
 
     for y in range(draw_y_fre):
         # 计算Y坐标
@@ -100,23 +109,25 @@ def all_draw(
             # 计算X坐标
             x_value = x * draw_img_x_max
 
-            # 隔行错位
-            if y % 2 == 1:
-                x_value += add_value
-
             rand_x_v = random.randint(0, rand_x)
             rand_y_v = random.randint(0, rand_y)
+
+            # 隔行错位
+            if x % 2 == 1:
+                rand_y_v += add_value
+
             draw(
                 draw_back,
                 draw_img,
                 x_value + rand_x_v,
                 y_value + rand_y_v
             )
+            print_array(draw_back)
 
     # 裁切回原来大小
     draw_back = draw_back[
-        0:back_shape_x,
         0:back_shape_y,
+        0:back_shape_x,
     ]
 
     # draw_back.shape [x,y,1]
@@ -124,8 +135,8 @@ def all_draw(
 
 
 if __name__ == '__main__':
-    draw_img = np.array([[50, 50], [20, 20]])
+    draw_img = np.array([[1, 2], [3, 4], [5, 6]])
 
-    re_img = all_draw(draw_img, 4, 8, 0, 0, 0, 0)
+    re_img = all_draw(draw_img, 9, 6, 0, 0, 0, 0)
     print(re_img.shape)
-    print(re_img)
+    # print_array(re_img)

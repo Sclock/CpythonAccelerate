@@ -11,8 +11,8 @@ def draw(img_back: np.ndarray, img_draw: np.ndarray, y: int, x: int) -> None:
     """
 
     # 坐标位置加上大小
-    x2 = x + img_draw.shape[1]
-    y2 = y + img_draw.shape[0]
+    x2: int = x + img_draw.shape[1]
+    y2: int = y + img_draw.shape[0]
 
     # 提取底图书写区域
     img_back_draw = img_back[y:y2, x:x2][:, :, 0]
@@ -37,6 +37,7 @@ def draw(img_back: np.ndarray, img_draw: np.ndarray, y: int, x: int) -> None:
 
     # 处理完毕，赋值回去
     img_back[y:y2, x:x2][:, :, 0] = new_back
+    # img_back.shape [x,y,1]
 
 
 def div_ceil(x: int, y: int) -> int:
@@ -68,16 +69,16 @@ def all_draw(
     """
 
     # 网格间距
-    draw_img_x_max = draw_img.shape[0] + space_x
-    draw_img_y_max = draw_img.shape[1] + space_y
+    draw_img_x_max: int = draw_img.shape[0] + space_x
+    draw_img_y_max: int = draw_img.shape[1] + space_y
 
     # 设置为最大随机数 乘 可放下的数量向上取整
-    draw_x_fre = div_ceil(back_shape_x, draw_img_x_max)
-    draw_y_fre = div_ceil(back_shape_y, draw_img_y_max)
+    draw_x_fre: int = div_ceil(back_shape_x, draw_img_x_max)
+    draw_y_fre: int = div_ceil(back_shape_y, draw_img_y_max)
 
     # 计算绘制层大小
-    draw_back_shape_x = (draw_x_fre * draw_img_x_max) + rand_x
-    draw_back_shape_y = (draw_y_fre * draw_img_y_max) + rand_y
+    draw_back_shape_x: int = (draw_x_fre * draw_img_x_max) + rand_x
+    draw_back_shape_y: int = (draw_y_fre * draw_img_y_max) + rand_y
 
     # 创建白色底层
     draw_back = np.ones(
@@ -89,7 +90,7 @@ def all_draw(
     ) * 255
 
     # 错位坐标计算
-    add_value = draw_img_x_max // 3
+    add_value: int = draw_img_x_max // 3
 
     for y in range(draw_y_fre):
         # 计算Y坐标
@@ -118,6 +119,7 @@ def all_draw(
         0:back_shape_y,
     ]
 
+    # draw_back.shape [x,y,1]
     return draw_back
 
 

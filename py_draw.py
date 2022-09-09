@@ -44,6 +44,13 @@ def draw(img_back: np.ndarray, img_draw: np.ndarray, x: int, y: int) -> None:
             else:
                 new_back[_y, _x] = img_back_draw[_y, _x]
 
+    # where存档
+    # new_back = np.where(
+    #     img_draw < img_back_draw,
+    #     img_draw,
+    #     img_back_draw
+    # )
+
     # 处理完毕，赋值回去
     img_back[y:y2, x:x2][:, :, 0] = new_back
     # img_back.shape [x,y,1]
@@ -66,8 +73,9 @@ def all_draw(
     """完整密铺水印
 
     Args:
-        draw_back (np.ndarray): 底图
         draw_img (np.ndarray): 水印
+        back_shape_x (int): 底图X方向上的大小
+        back_shape_y (int): 底图Y方向上的大小
         rand_x (int): X方向上的随机数上限
         rand_y (int): Y方向上的随机数上限
         space_x (int): X方向上的基础间距
@@ -122,7 +130,6 @@ def all_draw(
                 x_value + rand_x_v,
                 y_value + rand_y_v
             )
-            print_array(draw_back)
 
     # 裁切回原来大小
     draw_back = draw_back[

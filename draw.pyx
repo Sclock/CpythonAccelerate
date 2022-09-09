@@ -10,10 +10,8 @@ cimport numpy as np
 
 np.import_array()
 
-# ctypedef np.uint8_t dtype_t
-ctypedef np.long dtype_t
 
-cdef void draw(uint8_t[:,:,::1] img_back, uint8_t[:,:] img_draw, int x, int y):
+cdef void draw(np.ndarray[uint8_t, ndim=3] img_back, np.ndarray[uint8_t, ndim=2] img_draw, int x, int y):
     # 作业大小
     cdef int draw_region_x = <int>img_draw.shape[1]
     cdef int draw_region_y = <int>img_draw.shape[0]
@@ -25,12 +23,12 @@ cdef void draw(uint8_t[:,:,::1] img_back, uint8_t[:,:] img_draw, int x, int y):
     cdef uint8_t[:,:] img_back_draw = img_back[y:y2, x:x2][:,:,0]
 
     # 写区域
-    cdef np.ndarray[dtype_t, ndim=2] new_back = np.empty(
+    cdef np.ndarray[uint8_t, ndim=2] new_back = np.empty(
         (
             draw_region_y,
             draw_region_x,
-        ), dtype=int
-    ) * 255
+        )
+    ).astype('uint8') * 255
 
     # 开始拼合
     # 底图和水印谁更小取谁
@@ -52,14 +50,16 @@ cdef inline int div_ceil(int a, int b):
 
 @cython.cdivision(True)
 cdef inline int randint(int a):
+    if a == 0:
+        return 0
     return rand() % a
 
 
-cpdef np.ndarray[dtype_t, ndim=3] draw_all(uint8_t[:,:]  draw_img, int back_shape_x, int back_shape_y, int rand_x, int rand_y , int space_x, int space_y):
+cpdef np.ndarray[uint8_t, ndim=3] draw_all(np.ndarray[uint8_t, ndim=2] draw_img, int back_shape_x, int back_shape_y, int rand_x, int rand_y , int space_x, int space_y):
     
     # 网格间距
     cdef int draw_img_x_max = <int>draw_img.shape[1] + space_x
-    cdef int draw_img_y_max = <int> draw_img.shape[0] + space_y
+    cdef int draw_img_y_max = <int>draw_img.shape[0] + space_y
 
     # 错位坐标计算
     cdef int add_value = draw_img_x_max // 3
@@ -73,14 +73,17 @@ cpdef np.ndarray[dtype_t, ndim=3] draw_all(uint8_t[:,:]  draw_img, int back_shap
     cdef int draw_back_shape_y = (draw_y_fre * draw_img_y_max) + rand_y + add_value
 
     # 创建白色底层
-    cdef np.ndarray[long, ndim=3] draw_back = np.ones(
+    cdef np.ndarray[uint8_t, ndim=3] draw_back = np.ones(
         (
             draw_back_shape_y,
             draw_back_shape_x,
             1
-        ), dtype=int
-    ) * 255
+        )
+    ).astype('uint8') * 255
 
+    # cdef int x, y, x_value, y_value, rand_x_v, rand_y_v
+    cdef int rand_x_v = 0
+    cdef int rand_y_v = 0
 
     for y in range(draw_y_fre):
         # 计算Y坐标
@@ -89,14 +92,14 @@ cpdef np.ndarray[dtype_t, ndim=3] draw_all(uint8_t[:,:]  draw_img, int back_shap
         for x in range(draw_x_fre):
             # 计算X坐标
             x_value = x * draw_img_x_max
-
+            
             rand_x_v = randint(rand_x)  # 改成C的rand来加速
             rand_y_v = randint(rand_y)
 
             # 隔行错位
             if x % 2 == 1:
                 rand_y_v += add_value
-
+            
             draw(
                 draw_back,
                 draw_img,

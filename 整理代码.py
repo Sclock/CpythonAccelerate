@@ -2,32 +2,41 @@ import numpy as np
 import random
 
 
-def draw(back_img: np.ndarray, draw_img: np.ndarray, y: int, x: int) -> np.ndarray:
+def draw(img_back: np.ndarray, img_draw: np.ndarray, y: int, x: int) -> None:
     """
     L模式输入底图,写图,和坐标
     图像叠加,指定区域改写为新图片
+    img_back shape: [x,y,1]
+    img_draw shape: [x,y]
     """
 
     # 坐标位置加上大小
-    x2 = x + draw_img.shape[1]
-    y2 = y + draw_img.shape[0]
+    x2 = x + img_draw.shape[1]
+    y2 = y + img_draw.shape[0]
 
     # 提取底图书写区域
-    back_draw = back_img[y:y2, x:x2][:, :, 0]
+    img_back_draw = img_back[y:y2, x:x2][:, :, 0]
+    # img_back_draw.shape [x,y]
+
+    new_back = np.empty(
+        (
+            draw_img.shape[0],
+            draw_img.shape[1],
+        ), dtype=int
+    ) * 255
+    # new_back.shape [x,y]
 
     # 开始拼合
     # 底图和水印谁更小取谁
-    back_draw_ed = np.clip(
-        np.where(
-            draw_img < back_draw,
-            draw_img,
-            back_draw
-        ), 0, 255
-    )
+    for _y in range(img_draw.shape[1]):
+        for _x in range(img_draw.shape[0]):
+            if img_draw[_y, _x] < img_back_draw[_y, _x]:
+                new_back[_y, _x] = img_draw[_y, _x]
+            else:
+                new_back[_y, _x] = img_back_draw[_y, _x]
 
     # 处理完毕，赋值回去
-    back_img[y:y2, x:x2][:, :, 0] = back_draw_ed
-    return back_img
+    img_back[y:y2, x:x2][:, :, 0] = new_back
 
 
 def div_ceil(x: int, y: int) -> int:
@@ -84,11 +93,11 @@ def all_draw(
 
     for y in range(draw_y_fre):
         # 计算Y坐标
-        y_value = (y+1) * draw_img_y_max
+        y_value = y * draw_img_y_max
 
         for x in range(draw_x_fre):
             # 计算X坐标
-            x_value = (x+1) * draw_img_x_max
+            x_value = x * draw_img_x_max
 
             # 隔行错位
             if y % 2 == 1:
@@ -96,7 +105,7 @@ def all_draw(
 
             rand_x_v = random.randint(0, rand_x)
             rand_y_v = random.randint(0, rand_y)
-            draw_back = draw(
+            draw(
                 draw_back,
                 draw_img,
                 x_value + rand_x_v,
@@ -112,8 +121,9 @@ def all_draw(
     return draw_back
 
 
-draw_back = [[[255, 255, 255, 0], [255, 255, 255, 0]],
-             [[255, 255, 255, 0], [255, 255, 255, 0]]]
+if __name__ == '__main__':
+    draw_img = np.array([[50, 50], [20, 20]])
 
-draw_img = [[[255], [255]],
-            [[255], [255]]]
+    re_img = all_draw(draw_img, 4, 8, 0, 0, 0, 0)
+    print(re_img.shape)
+    print(re_img)

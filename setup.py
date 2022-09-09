@@ -6,12 +6,12 @@ setup(
     name="draw",
     ext_modules=cythonize(
         "draw.pyx",
-        # compiler_directives={
-        #     "cdivision": True,
-        #     "embedsignature": True,
-        #     "boundscheck": False,
-        #     "wraparound": False
-        # }
+        compiler_directives={
+            "cdivision": True,
+            "embedsignature": True,
+            "boundscheck": False,
+            "wraparound": False
+        }
     ),
     include_dirs=[np.get_include()]
 )

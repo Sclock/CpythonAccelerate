@@ -19,16 +19,18 @@ draw_img = np.ones(
         500,
         300,
     )
-).astype('uint8') * 255
+).astype('uint8') * 0
 
 s_t = time.time()
-re_img = draw_all(draw_img, 2000, 2000, 0, 0, 0, 0)
+c_re_img = draw_all(draw_img, 2000, 2000, 0, 0, 0, 0)
 print("cy", time.time() - s_t)
 
 
 s_t = time.time()
-re_img = all_draw(draw_img, 2000, 2000, 0, 0, 0, 0)
+p_re_img = all_draw(draw_img, 2000, 2000, 0, 0, 0, 0)
 print("py", time.time() - s_t)
 
+
+print((c_re_img == p_re_img).all())
 
 print("end")
